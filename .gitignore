@@ -1,0 +1,10 @@
+# dependencies 相依的所有組件
+node_modules
+# logs
+npm-debug. logs
+# 前端包檔產生目錄
+dist
+# System 系統檔案 (mac特有)
+.DS_Store
+# Build 編譯執行目錄
+build

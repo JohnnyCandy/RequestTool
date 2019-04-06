@@ -1,0 +1,23 @@
+{
+  "name": "requesttool",
+  "version": "1.0.0",
+  "description": "Hello",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JohnnyCandy/RequestTool.git"
+  },
+  "author": "JohnnyCandy",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/JohnnyCandy/RequestTool/issues"
+  },
+  "homepage": "https://github.com/JohnnyCandy/RequestTool#readme",
+  "dependencies": {
+    "koa": "^2.7.0"
+  }
+}
