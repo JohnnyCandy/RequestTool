@@ -14,7 +14,9 @@ router.get('/', async(ctx) => {
             <label>URL</label>         
             <input name="url" style="width:1000px"/><br/>  
             <label>Token</label>         
-            <input name="token" style="width:1000px"/><br/>           
+            <input name="token" style="width:1000px"/><br/>
+            <label>Key</label>         
+            <input name="key" style="width:1000px"/><br/>            
             <button type="submit">submit</button>       
         </form>     
     `; 
@@ -22,20 +24,23 @@ router.get('/', async(ctx) => {
 router.post('/', async(ctx) => {     
     let method = ctx.request.body.method + '&token=' + ctx.request.body.token;
     let url = ctx.request.body.url;
-    let MD5 = md5(method + '&3454693@').toUpperCase();
-    let DES = encrypt(method + '&sign=' + MD5);
+    let key = ctx.request.body.key;
+    let MD5 = md5(method + '&' + key).toUpperCase();
+    let DES = encrypt(method + '&sign=' + MD5,key);
     let result = '';
     request.post(
         url+'/api?'+DES,
         { json: { key: 'value' } },
         function (error, response, body) {
             if (!error && response.statusCode == 200) {
-                result = decrypt(body);
-                console.log(body);
+                result = body;
+                // result = decrypt(body,key); //待完成
+            }
+            else {
+                result = "Post Error"; //待完成    
             }
         }
     );
-    console.log(url+'/api?'+DES);
     ctx.body = `
         <form method="POST" action="/">     
             <label>Method:</label>
@@ -50,7 +55,7 @@ router.post('/', async(ctx) => {
     `; 
 });
 // openssl enc -des3 -in input.txt -out input.enc
-function encrypt(password) {
+function encrypt(password,key) {
     var input = password;
    
     // DES key and IV sizes
@@ -67,7 +72,7 @@ function encrypt(password) {
     var derivedBytes = forge.pbe.opensslDeriveBytes(
       password, salt, keySize + ivSize/*, md*/);
     var buffer = forge.util.createBuffer(derivedBytes);
-    var key = '3454693@';
+    var key = key;
     var iv = buffer.getBytes(ivSize);
    
     var cipher = forge.cipher.createCipher('DES-ECB', key);
@@ -78,14 +83,13 @@ function encrypt(password) {
     return encrypted.toHex();
 }
 // openssl enc -d -des3 -in input.enc -out input.dec.txt
-function decrypt(password) {
+function decrypt(password,key) {
     var input = password;
-   
+    
     // parse salt from input
     input = forge.util.createBuffer(input, 'binary');
     // read 8-byte salt
-    var salt = input.getBytes(8);
-   
+    var salt = forge.random.getBytesSync(8);
     // Note: if using "-nosalt", skip above parsing and use
     // var salt = null;
    
@@ -96,7 +100,7 @@ function decrypt(password) {
     var derivedBytes = forge.pbe.opensslDeriveBytes(
       password, salt, keySize + ivSize);
     var buffer = forge.util.createBuffer(derivedBytes);
-    var key = '3454693@';
+    var key = key;
     var iv = buffer.getBytes(ivSize);
    
     var decipher = forge.cipher.createDecipher('DES-ECB', key);
@@ -104,7 +108,6 @@ function decrypt(password) {
     decipher.update(input);
     decipher.finish(); // check 'result' for true/false
     var decrypted = decipher.output;
-    console.log(decrypted);
     return decrypted.toHex();
   }
 app.use(bodyParser());
